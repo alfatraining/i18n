@@ -18,29 +18,34 @@ var _ i18n.Backend = &Backend{}
 func New(paths ...string) *Backend {
 	backend := &Backend{}
 
+	var files []string
 	for _, p := range paths {
 		if file, err := os.Open(p); err == nil {
 			defer file.Close()
 			if fileInfo, err := file.Stat(); err == nil {
 				if fileInfo.IsDir() {
 					yamlFiles, _ := filepath.Glob(filepath.Join(p, "*.yaml"))
-					backend.files = append(backend.files, yamlFiles...)
+					files = append(files, yamlFiles...)
 
 					ymlFiles, _ := filepath.Glob(filepath.Join(p, "*.yml"))
-					backend.files = append(backend.files, ymlFiles...)
+					files = append(files, ymlFiles...)
 				} else if fileInfo.Mode().IsRegular() {
-					backend.files = append(backend.files, p)
+					files = append(files, p)
 				}
 			}
 		}
 	}
-
+	for _, file := range files {
+		if content, err := ioutil.ReadFile(file); err == nil {
+			backend.contents = append(backend.contents, content)
+		}
+	}
 	return backend
 }
 
 // Backend YAML backend
 type Backend struct {
-	files []string
+	contents [][]byte
 }
 
 func loadTranslationsFromYaml(locale string, value interface{}, scopes []string) (translations []*i18n.Translation) {
@@ -76,11 +81,9 @@ func (backend *Backend) LoadYAMLContent(content []byte) (translations []*i18n.Tr
 
 // LoadTranslations load translations from YAML backend
 func (backend *Backend) LoadTranslations() (translations []*i18n.Translation) {
-	for _, file := range backend.files {
-		if content, err := ioutil.ReadFile(file); err == nil {
-			if results, err := backend.LoadYAMLContent(content); err == nil {
-				translations = append(translations, results...)
-			}
+	for _, content := range backend.contents {
+		if results, err := backend.LoadYAMLContent(content); err == nil {
+			translations = append(translations, results...)
 		} else {
 			panic(err)
 		}
