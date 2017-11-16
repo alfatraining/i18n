@@ -43,10 +43,6 @@ func TestFallbackLocale(t *testing.T) {
 	i18n := New(&backend{})
 	i18n.AddTranslation(&Translation{Key: "hello-world", Locale: "en-AU", Value: "Hello World"})
 
-	if i18n.Fallbacks("en-AU").T("en-UK", "hello-world") != "Hello World" {
-		t.Errorf("Should fallback en-UK to en-US")
-	}
-
 	if i18n.T("en-DE", "hello-world") != "hello-world" {
 		t.Errorf("Haven't setup any fallback")
 	}

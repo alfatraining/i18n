@@ -62,7 +62,6 @@ func NewWithWalk(paths ...string) i18n.Backend {
 			backend.contents = append(backend.contents, content)
 		}
 	}
-
 	return backend
 }
 
