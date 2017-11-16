@@ -108,6 +108,11 @@ func (i18n *I18n) DeleteTranslation(translation *Translation) (err error) {
 	return i18n.cacheStore.Delete(cacheKey(translation.Locale, translation.Key))
 }
 
+// Default default value of translation if key is missing
+func (i18n *I18n) Default(value string) *I18n {
+	return &I18n{cacheStore: i18n.cacheStore, scope: i18n.scope, value: value, Backends: i18n.Backends, FallbackLocales: i18n.FallbackLocales, fallbackLocales: i18n.fallbackLocales}
+}
+
 // T translate with locale, key and arguments
 func (i18n *I18n) T(locale, key string, args ...interface{}) template.HTML {
 	var (
